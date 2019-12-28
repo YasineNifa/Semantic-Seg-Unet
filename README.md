@@ -3,7 +3,7 @@ L'objectif de ce projet est d'entrainer un modèle de segmentation d'images,le m
 qui a été entrainé sur un ensemble de données de 105 images des présidents des états-unis, et testé sur 27 images
 
 La première étape :
-collecter la base de données en utilisant un programme python qui permet de scrapper les images de "obama" et de "trump" par le web
+Collecter la base de données en utilisant un programme python qui permet de scrapper les images de "obama" et de "trump" par le web
 
 La deuxième étape :
 Normaliser les images de notre base de données en redimensionnant ces images sous la meme taille.

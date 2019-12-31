@@ -1,0 +1,158 @@
+<html lang="fr">
+  	<head>
+  		<meta charset="utf-8" />
+    	<title>Outil de segmentation</title>
+    	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+        integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+        <style>
+           body {
+             margin: 10px 0 ;
+			 padding: 0 ;
+			 text-align: center ;
+			 font: 0.8em "Trebuchet MS", helvetica, sans-serif ;
+			 
+			 
+           }
+           div#conteneur{
+           	width: 770px ;
+			margin: 0 auto ;
+			text-align: left ;
+			border: 2px solid #ab4 ;
+			background: #fff ;
+			}
+			h1#header{
+  			height: 258px ;
+  			background: url(téléchargement.jpg) no-repeat left top ;
+  			margin: 0 ;
+			}
+			h1#header a
+			{
+				width: 400px ;
+				height: 170px ;
+				display: block ;
+				position: relative ;
+				background: url(Capture3.PNG) no-repeat ;
+				left: 350px ;
+				top: 15px ;
+				text-indent: -5000px ;
+			}
+			div#contenu
+			{
+				background: url(bg_page.gif) no-repeat 15px 15px ;
+				padding: 0 25px 0 100px ;
+			}
+			div#contenu a
+			{
+				color: #8a0 ;
+			}
+			div#contenu a:hover
+			{
+				color: #9b2 ;
+			}
+			p#footer
+			{
+				margin: 0 ;
+				padding-right: 10px ;
+				line-height: 30px ;
+				color: #8a0 ;
+				height: 258px ;
+			}
+			div#contenu p
+			{
+				text-align: justify ;
+				text-indent: 2em ;
+				line-height: 1.7em ;
+			}
+			pre span
+			{
+				color: #560 ;
+			}
+
+			pre span.comment
+			{
+				color: #b30000 ;
+			}
+			
+        </style>
+	</head>
+  	<body>
+  		<!--p>Outil de Segmentation</p-->
+	    <main>
+	    	<!--Faites de moi un commentaire, je veux disparaître.-->
+	    	<!--img src="téléchargement.jpg" /-->
+		    <div id="conteneur" class="container mt-5">
+		    	<h1 id="header"><a href="#" title="Outil de Segmentation - Accueil"><span>Outil de Segmentation</span></a></h1>
+		    	<!--img src="téléchargement.jpg" width="256" height="100" /-->
+		        <div  class="row">
+		            <div class="col-6">
+		                <input id="image-selector" class="form-control border-0" type="file" style="font: bold 14px Arial;">
+		            </div>
+		            <div class="col-6">
+		            	<button id="predict-button" class="btn btn-dark float-right" type="button" style="font: bold 14px Arial;">Segmenter</button><br />
+		                
+		            </div>
+		        </div>
+		        <hr>
+				<div class="row">
+					<div class="col">
+		                <h2 class="ml-3">Image</h2>
+		                <img id="selected-image" class="ml-3" src="" width="256" height="256" />
+		            </div>
+		            <hr>
+		            <div class="col">
+		                <h2 class="ml-3">Mask</h2>
+		                <p id="prediction-list"></p>
+		                <canvas id="predicted-mask-" width="256" height="256">
+		            </div>
+
+		        </div>
+		    </div>
+		    <p id="footer">Réalisation de l'outil de segmentation et du design par Yassine Nifa</p>
+		</main>
+
+
+
+		<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript">
+			let base64Image;
+			$('#image-selector').change(function(){
+				let reader =new FileReader();
+				reader.onload =function(e){
+					let dataURL =reader.result;
+					$("#selected-image").attr("src", dataURL);
+					base64Image =dataURL.replace("data:image/jpeg;base64,","");
+					console.log(base64Image);
+				}
+				reader.readAsDataURL($('#image-selector')[0].files[0]);
+				$('#prediction-list').text("");
+			});
+
+			$("#predict-button").click(function(event){
+				let message ={img: base64Image}
+				$.post("http://localhost:5000/segment", JSON.stringify(message), function(responce){
+					console.log(responce.mask);
+					var ctx =document.querySelector("canvas").getContext("2d");
+
+					var h = 256;
+					var w = 256;
+
+					var imgData = ctx.getImageData(0, 0, w, h);
+					var data = imgData.data;  //the array of RGBA values
+
+					for(var i = 0; i < h; i++) {
+					    for(var j = 0; j < w; j++) {
+					        var s = 4 * i * w + 4 * j;  // calculate the index in the array
+					        var x = responce.mask[i][j];  // the RGB values
+					        data[s] = x[0];
+					        data[s + 1] = x[1];
+					        data[s + 2] = x[2];
+					        data[s + 3] = 255;  // fully opaque
+					    }
+					}
+
+					ctx.putImageData(imgData, 0, 0);
+				});
+			});
+		</script>
+  	</body>
+</html>
